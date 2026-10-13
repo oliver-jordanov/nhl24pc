@@ -6,6 +6,7 @@
 #include "common/io_file.h"
 #include "core/file_format/pkg.h"
 #include "core/file_format/pkg_type.h"
+#include <iostream>
 
 static bool DecompressPFSC(std::span<const char> compressed_data,
                            std::span<char> decompressed_data) {
@@ -344,7 +345,8 @@ bool PKG::Extract(const std::filesystem::path& filepath, const std::filesystem::
             }
         }
 
-        const char dot = decompressedData[0x10];
+      std::cerr << "PFS metadata block " << i << std::endl;  
+      const char dot = decompressedData[0x10];
         const std::string_view dotdot(&decompressedData[0x28], 2);
         if (dot == '.' && dotdot == "..") {
             dinode_reached = true;
@@ -362,7 +364,11 @@ bool PKG::Extract(const std::filesystem::path& filepath, const std::filesystem::
 
                 ent_size = dirent.entsize;
                 auto& table = fsTable.emplace_back();
-                table.name = std::string(dirent.name, std::min<s32>(dirent.namelen, 511));
+              std::cerr << "Dirent offset=" << j
+          << " inode=" << dirent.ino
+          << " namelen=" << dirent.namelen
+          << " entsize=" << dirent.entsize << std::endl;  
+              table.name = std::string(dirent.name, std::min<s32>(dirent.namelen, 511));
                 table.inode = dirent.ino;
                 table.type = dirent.type;
 
