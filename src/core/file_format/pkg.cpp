@@ -348,9 +348,8 @@ bool PKG::Extract(const std::filesystem::path& filepath, const std::filesystem::
       std::cerr << "PFS metadata block " << i << std::endl;  
       const char dot = decompressedData[0x10];
         const std::string_view dotdot(&decompressedData[0x28], 2);
-        if (dot == '.' && dotdot == "..") {
-            dinode_reached = true;
-        }
+       
+      dinode_reached = (dot == '.' && dotdot == "..");
 
         // Get folder and file names.
         bool end_reached = false;
