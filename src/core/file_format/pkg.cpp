@@ -358,6 +358,16 @@ bool PKG::Extract(const std::filesystem::path& filepath, const std::filesystem::
             for (int j = 0; j < 0x10000; j += ent_size) {
                 Dirent dirent;
                 std::memcpy(&dirent, &decompressedData[j], sizeof(dirent));
+              if (dirent.entsize < 0 || dirent.namelen < 0 ||
+    (dirent.entsize != 0 &&
+     (dirent.entsize < 16 ||
+      dirent.entsize > 0x10000 - j ||
+      dirent.namelen > dirent.entsize - 16 ||
+      dirent.namelen > 511))) {
+    failreason = "Invalid PFS directory entry at block " +
+                 std::to_string(i) + ", offset " + std::to_string(j);
+    return false;
+}
                 if (dirent.ino == 0 || dirent.entsize == 0) {
                     break;
                 }
